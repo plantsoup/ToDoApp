@@ -4,7 +4,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, "");
 
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://todo.spear.ac/", // or your Pages URL
+      "Access-Control-Allow-Origin": "https://todo.spear.ac", // or your Pages URL
       "Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
