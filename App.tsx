@@ -129,7 +129,7 @@ const App: React.FC = () => {
           </div>
         </main>
          <footer className="text-center mt-12 py-4 text-dark-text-secondary">
-          <p>Powered by React & Gemini</p>
+          <p>https://github.com/plantsoup/ToDoApp</p>
         </footer>
       </div>
     </div>
