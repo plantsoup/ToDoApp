@@ -1,29 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Todo App</title>
-<style>
-  body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: auto; }
-  h1 { text-align: center; }
-  ul { list-style: none; padding: 0; }
-  li { display: flex; align-items: center; justify-content: space-between; margin: 0.5rem 0; padding: 0.5rem; border: 1px solid #ddd; border-radius: 5px; }
-  li.done span { text-decoration: line-through; color: #999; }
-  button { margin-left: 0.5rem; }
-  input { flex: 1; padding: 0.5rem; font-size: 1rem; }
-  #todoForm { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-</style>
-</head>
-<body>
-<h1>Todo App</h1>
-
-<form id="todoForm">
-  <input type="text" id="todoInput" placeholder="New todo" required />
-  <button type="submit">Add Todo</button>
-</form>
-
-<ul id="todoList"></ul>
-
 <script>
 const WORKER_URL = "https://to-do.gav-c8d.workers.dev"; // Your Worker API
 
@@ -39,6 +13,7 @@ async function fetchTodos() {
       
       const span = document.createElement('span');
       span.textContent = todo.text;
+      // Toggle done via PATCH request
       span.onclick = async () => toggleDone(todo);
       li.appendChild(span);
 
@@ -57,12 +32,18 @@ async function fetchTodos() {
   }
 }
 
-// Optional: toggle done (frontend only for now)
+// PATCH request to toggle done
 async function toggleDone(todo) {
-  todo.done = !todo.done;
-  // Send to API if Worker supports "done" column
-  // await fetch(`${WORKER_URL}/api/todos/${todo.id}`, { method: 'PATCH', body: JSON.stringify({ done: todo.done }) });
-  fetchTodos();
+  try {
+    await fetch(`${WORKER_URL}/api/todos/${todo.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ done: !todo.done })
+    });
+    fetchTodos();
+  } catch (err) {
+    console.error("Error updating todo:", err);
+  }
 }
 
 document.getElementById('todoForm').onsubmit = async (e) => {
@@ -80,5 +61,3 @@ document.getElementById('todoForm').onsubmit = async (e) => {
 // Initial fetch
 fetchTodos();
 </script>
-</body>
-</html>
