@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Todo App</title>
+<style>
+body { font-family: sans-serif; padding: 2rem; }
+ul { list-style: none; padding: 0; }
+li { margin: 0.5rem 0; }
+button { margin-left: 1rem; }
+</style>
+</head>
+<body>
+<h1>Todo App</h1>
+<form id="todoForm">
+  <input type="text" id="todoInput" placeholder="New todo" required />
+  <button type="submit">Add Todo</button>
+</form>
+<ul id="todoList"></ul>
+
+<script>
+async function fetchTodos() {
+  const res = await fetch('/api/todos');
+  const todos = await res.json();
+  const list = document.getElementById('todoList');
+  list.innerHTML = '';
+  todos.forEach(todo => {
+    const li = document.createElement('li');
+    li.textContent = todo.text;
+    const del = document.createElement('button');
+    del.textContent = 'Delete';
+    del.onclick = async () => {
+      await fetch('/api/todos/' + todo.id, { method: 'DELETE' });
+      fetchTodos();
+    };
+    li.appendChild(del);
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('todoForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('todoInput');
+  await fetch('/api/todos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: input.value })
+  });
+  input.value = '';
+  fetchTodos();
+};
+
+fetchTodos();
+</script>
+</body>
+</html>
