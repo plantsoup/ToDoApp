@@ -1,0 +1,8 @@
+name = "todoapp"
+main = "_worker.js"
+compatibility_date = "2025-10-06"
+
+[[d1_databases]]
+binding = "TODO_DB"
+database_name = "todo-db"
+# database_id will be provided by Cloudflare Pages binding
