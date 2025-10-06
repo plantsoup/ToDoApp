@@ -19,8 +19,10 @@ button { margin-left: 1rem; }
 <ul id="todoList"></ul>
 
 <script>
+const WORKER_URL = "https://to-do.gav-c8d.workers.dev"; // <-- Worker API URL
+
 async function fetchTodos() {
-  const res = await fetch('/api/todos');
+  const res = await fetch(`${WORKER_URL}/api/todos`);
   const todos = await res.json();
   const list = document.getElementById('todoList');
   list.innerHTML = '';
@@ -30,7 +32,7 @@ async function fetchTodos() {
     const del = document.createElement('button');
     del.textContent = 'Delete';
     del.onclick = async () => {
-      await fetch('/api/todos/' + todo.id, { method: 'DELETE' });
+      await fetch(`${WORKER_URL}/api/todos/${todo.id}`, { method: 'DELETE' });
       fetchTodos();
     };
     li.appendChild(del);
@@ -41,7 +43,7 @@ async function fetchTodos() {
 document.getElementById('todoForm').onsubmit = async (e) => {
   e.preventDefault();
   const input = document.getElementById('todoInput');
-  await fetch('/api/todos', {
+  await fetch(`${WORKER_URL}/api/todos`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text: input.value })
@@ -54,3 +56,4 @@ fetchTodos();
 </script>
 </body>
 </html>
+
