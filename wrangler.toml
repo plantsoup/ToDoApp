@@ -1,5 +1,5 @@
 name = "todoapp"
-main = "_worker.js"
+main = "worker.js"
 compatibility_date = "2025-10-06"
 
 [[d1_databases]]
