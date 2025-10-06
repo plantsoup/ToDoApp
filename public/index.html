@@ -1,63 +1,63 @@
 <script>
-const WORKER_URL = "https://to-do.gav-c8d.workers.dev"; // Your Worker API
+document.addEventListener("DOMContentLoaded", () => {
+  const WORKER_URL = "https://to-do.gav-c8d.workers.dev"; // Your Worker API
 
-async function fetchTodos() {
-  try {
-    const res = await fetch(`${WORKER_URL}/api/todos`);
-    const todos = await res.json();
-    const list = document.getElementById('todoList');
-    list.innerHTML = '';
-    todos.forEach(todo => {
-      const li = document.createElement('li');
-      li.className = todo.done ? 'done' : '';
-      
-      const span = document.createElement('span');
-      span.textContent = todo.text;
-      // Toggle done via PATCH request
-      span.onclick = async () => toggleDone(todo);
-      li.appendChild(span);
+  async function fetchTodos() {
+    try {
+      const res = await fetch(`${WORKER_URL}/api/todos`);
+      const todos = await res.json();
+      const list = document.getElementById('todoList');
+      list.innerHTML = '';
+      todos.forEach(todo => {
+        const li = document.createElement('li');
+        li.className = todo.done ? 'done' : '';
 
-      const del = document.createElement('button');
-      del.textContent = 'Delete';
-      del.onclick = async () => {
-        await fetch(`${WORKER_URL}/api/todos/${todo.id}`, { method: 'DELETE' });
-        fetchTodos();
-      };
-      li.appendChild(del);
+        const span = document.createElement('span');
+        span.textContent = todo.text;
+        span.onclick = async () => toggleDone(todo);
+        li.appendChild(span);
 
-      list.appendChild(li);
-    });
-  } catch (err) {
-    console.error("Error fetching todos:", err);
+        const del = document.createElement('button');
+        del.textContent = 'Delete';
+        del.onclick = async () => {
+          await fetch(`${WORKER_URL}/api/todos/${todo.id}`, { method: 'DELETE' });
+          fetchTodos();
+        };
+        li.appendChild(del);
+
+        list.appendChild(li);
+      });
+    } catch (err) {
+      console.error("Error fetching todos:", err);
+    }
   }
-}
 
-// PATCH request to toggle done
-async function toggleDone(todo) {
-  try {
-    await fetch(`${WORKER_URL}/api/todos/${todo.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ done: !todo.done })
+  async function toggleDone(todo) {
+    try {
+      await fetch(`${WORKER_URL}/api/todos/${todo.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ done: !todo.done })
+      });
+      fetchTodos();
+    } catch (err) {
+      console.error("Error updating todo:", err);
+    }
+  }
+
+  document.getElementById('todoForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('todoInput');
+    await fetch(`${WORKER_URL}/api/todos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: input.value })
     });
+    input.value = '';
     fetchTodos();
-  } catch (err) {
-    console.error("Error updating todo:", err);
-  }
-}
+  };
 
-document.getElementById('todoForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const input = document.getElementById('todoInput');
-  await fetch(`${WORKER_URL}/api/todos`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: input.value })
-  });
-  input.value = '';
+  // Initial fetch
   fetchTodos();
-};
-
-// Initial fetch
-fetchTodos();
+});
 </script>
