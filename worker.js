@@ -4,8 +4,8 @@ export default {
     const path = url.pathname.replace(/\/+$/, "");
 
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "*", // or your Pages URL for more security
-      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+      "Access-Control-Allow-Origin": "*", // or your Pages URL
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, PATCH, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
@@ -24,25 +24,35 @@ export default {
         )
       `).run();
 
-      // API routes
+      // GET /api/todos
       if (path === "/api/todos" && request.method === "GET") {
         const { results } = await env.TODO_DB.prepare("SELECT * FROM todos").all();
         return new Response(JSON.stringify(results), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
 
+      // POST /api/todos
       if (path === "/api/todos" && request.method === "POST") {
         const { text } = await request.json();
         await env.TODO_DB.prepare("INSERT INTO todos (text) VALUES (?)").bind(text).run();
         return new Response("Created", { headers: corsHeaders, status: 201 });
       }
 
+      // DELETE /api/todos/:id
       if (path.startsWith("/api/todos/") && request.method === "DELETE") {
         const id = path.split("/").pop();
         await env.TODO_DB.prepare("DELETE FROM todos WHERE id = ?").bind(id).run();
         return new Response("Deleted", { headers: corsHeaders, status: 200 });
       }
 
-      // Optional: fallback HTML page (if requested)
+      // PATCH /api/todos/:id  → update done status
+      if (path.startsWith("/api/todos/") && request.method === "PATCH") {
+        const id = path.split("/").pop();
+        const { done } = await request.json();
+        await env.TODO_DB.prepare("UPDATE todos SET done = ? WHERE id = ?").bind(done ? 1 : 0, id).run();
+        return new Response("Updated", { headers: corsHeaders, status: 200 });
+      }
+
+      // Fallback
       return new Response("<h1>Todo Worker API</h1>", { headers: corsHeaders });
 
     } catch (err) {
@@ -50,5 +60,3 @@ export default {
     }
   },
 };
-
-
