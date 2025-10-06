@@ -1,4 +1,4 @@
-name = "todoapp"
+name = "to-do"
 main = "worker.js"
 compatibility_date = "2025-10-06"
 
