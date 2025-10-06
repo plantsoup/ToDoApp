@@ -4,7 +4,7 @@ export default {
     const path = url.pathname.replace(/\/+$/, "");
 
     try {
-      // Ensure table exists (auto-migration)
+      // --- Ensure table exists ---
       await env.TODO_DB.prepare(`
         CREATE TABLE IF NOT EXISTS todos (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -21,6 +21,7 @@ export default {
 
       if (path === "/api/todos" && request.method === "POST") {
         const { text } = await request.json();
+        if (!text) return new Response("Missing text", { status: 400 });
         await env.TODO_DB.prepare("INSERT INTO todos (text) VALUES (?)").bind(text).run();
         return new Response("Created", { status: 201 });
       }
@@ -31,13 +32,32 @@ export default {
         return new Response("Deleted", { status: 200 });
       }
 
-      // --- Serve static frontend ---
-      return env.ASSETS.fetch(request);
+      // --- Basic fallback frontend ---
+      return new Response(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>Todo App</title>
+        </head>
+        <body>
+          <h1>Todo App</h1>
+          <p>API endpoints:</p>
+          <ul>
+            <li>GET /api/todos</li>
+            <li>POST /api/todos (JSON body {"text":"Your todo"})</li>
+            <li>DELETE /api/todos/:id</li>
+          </ul>
+        </body>
+        </html>
+      `, {
+        headers: { "Content-Type": "text/html" }
+      });
 
     } catch (err) {
-      // Catch any unexpected errors
       return new Response(`Worker error: ${err.message}`, { status: 500 });
     }
   },
 };
+
 
